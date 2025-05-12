@@ -36,8 +36,6 @@ func TestGetAPIKey(t *testing.T) {
 
 	for _, test := range tests {
 		result, err := GetAPIKey(test.Input)
-
-		t.Fatalf("test case '%s' failed: %v", test.Name, result)
 		if result != test.Expected.Text || err != test.Expected.Err {
 
 			t.Fatalf("test case '%s' failed: %v", test.Name, result)
