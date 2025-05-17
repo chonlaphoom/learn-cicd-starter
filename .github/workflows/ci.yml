@@ -20,9 +20,10 @@ jobs:
 
       - name: Test 
         run: go test ./... -cover
+
   check_formatting: 
     name: Check_Formatting
-    runs-on: ubunto-latest
+    runs-on: ubuntu-latest
 
     steps: 
       - name: Check out code
