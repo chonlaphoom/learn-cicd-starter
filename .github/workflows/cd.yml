@@ -6,15 +6,23 @@ jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: '${{ secrets.DATABASE_URL }}'
     steps:
+      # -- checkout and setup go, goose
       - name: Check out code
         uses: actions/checkout@v4
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.23.0"
+      - name: Set up Goose
+        uses: mscno/setup-goose@v1
+        run: 'echo "check goose version $(goose -version)"'
+      # -- build app with go build
       - name: Build Application
         run: ./scripts/buildprod.sh
+      # -- login gcloud
       - id: 'auth'
         uses: 'google-github-actions/auth@v2'
         with:
@@ -23,7 +31,11 @@ jobs:
         uses: 'google-github-actions/setup-gcloud@v2'
       - name: 'Use gcloud CLI'
         run: 'gcloud info'
+      # -- buld image and submit to gcloud
       - name: 'build image and submit to gcloud'
         run: gcloud builds submit --tag us-central1-docker.pkg.dev/notely-460205/notely-ar-repo/notely:latest .
+      - name: 'Database Migration'
+        run: ./scripts/migrateup.sh
+      # -- Deploy and run
       - name: Deploy to Cloud Run
         run: gcloud run deploy notely --image us-central1-docker.pkg.dev/notely-460205/notely-ar-repo/notely:latest --region us-central1 --allow-unauthenticated --project notely-460205 --max-instances=4
